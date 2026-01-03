@@ -1,0 +1,6 @@
+# ignore python
+__pycache__/
+
+# ignore c++
+.vs/
+x64/
