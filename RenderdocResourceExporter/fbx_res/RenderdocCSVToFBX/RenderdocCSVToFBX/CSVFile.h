@@ -47,6 +47,13 @@ public:
 	void	WriteCSVFile(const char* szFileName);
 
 	int		GetRowNum();
+
+	bool GetSemanticValue(
+		const char* semantic,
+		int semanticIndex,
+		char component,          // 'x','y','z','w'
+		int rowIndex,
+		float& outValue);
  
 	bool	GetCellValue(const char* fieldName,int rowIndex,std::wstring& resValue);
 	bool	GetCellValue(int colIndex,int rowIndex,std::wstring& resValue);

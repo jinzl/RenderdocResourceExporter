@@ -56,45 +56,46 @@ void ConvertCSV2FBX(const char* sourceCSVFile,
 
 		if (verticsMap.find(iVertexID) == verticsMap.end())
 		{
-			pSrcFile->GetCellValue("in_POSITION0.x", iRow, verticsMap[iVertexID].x);
-			pSrcFile->GetCellValue("in_POSITION0.y", iRow, verticsMap[iVertexID].y);
-			pSrcFile->GetCellValue("in_POSITION0.z", iRow, verticsMap[iVertexID].z);
+			auto& v = verticsMap[iVertexID];
+			pSrcFile->GetSemanticValue("POSITION", 0, 'x', iRow, v.x);
+			pSrcFile->GetSemanticValue("POSITION", 0, 'y', iRow, v.y);
+			pSrcFile->GetSemanticValue("POSITION", 0, 'z', iRow, v.z);
 
 			if(export_normal)
 			{
-				pSrcFile->GetCellValue("in_NORMAL0.x", iRow, verticsMap[iVertexID].nx);
-				pSrcFile->GetCellValue("in_NORMAL0.y", iRow, verticsMap[iVertexID].ny);
-				pSrcFile->GetCellValue("in_NORMAL0.z", iRow, verticsMap[iVertexID].nz);
+				pSrcFile->GetSemanticValue("NORMAL", 0, 'x', iRow, v.nx);
+				pSrcFile->GetSemanticValue("NORMAL", 0, 'y', iRow, v.ny);
+				pSrcFile->GetSemanticValue("NORMAL", 0, 'z', iRow, v.nz);
 			}
 			if(export_tangent)
 			{
-				pSrcFile->GetCellValue("in_TANGENT0.x", iRow, verticsMap[iVertexID].tx);
-				pSrcFile->GetCellValue("in_TANGENT0.y", iRow, verticsMap[iVertexID].ty);
-				pSrcFile->GetCellValue("in_TANGENT0.z", iRow, verticsMap[iVertexID].tz);
-				pSrcFile->GetCellValue("in_TANGENT0.w", iRow, verticsMap[iVertexID].tw);
+				pSrcFile->GetSemanticValue("TANGENT", 0, 'x', iRow, v.tx);
+				pSrcFile->GetSemanticValue("TANGENT", 0, 'y', iRow, v.ty);
+				pSrcFile->GetSemanticValue("TANGENT", 0, 'z', iRow, v.tz);
+				pSrcFile->GetSemanticValue("TANGENT", 0, 'w', iRow, v.tw);
 			}
 
 			if(export_uv)
 			{
-				pSrcFile->GetCellValue("in_TEXCOORD0.x", iRow, verticsMap[iVertexID].u);
-				pSrcFile->GetCellValue("in_TEXCOORD0.y", iRow, verticsMap[iVertexID].v);
+				pSrcFile->GetSemanticValue("TEXCOORD", 0, 'x', iRow, v.u);
+				pSrcFile->GetSemanticValue("TEXCOORD", 0, 'y', iRow, v.v);
 			}
 			if(export_uv2)
 			{
-				pSrcFile->GetCellValue("in_TEXCOORD1.x", iRow, verticsMap[iVertexID].u2);
-				pSrcFile->GetCellValue("in_TEXCOORD1.y", iRow, verticsMap[iVertexID].v2);
+				pSrcFile->GetSemanticValue("TEXCOORD", 1, 'x', iRow, v.u2);
+				pSrcFile->GetSemanticValue("TEXCOORD", 1, 'y', iRow, v.v2);
 			}
 			if(export_uv3)
 			{
-				pSrcFile->GetCellValue("in_TEXCOORD2.x", iRow, verticsMap[iVertexID].u3);
-				pSrcFile->GetCellValue("in_TEXCOORD2.y", iRow, verticsMap[iVertexID].v3);
+				pSrcFile->GetSemanticValue("TEXCOORD", 2, 'x', iRow, v.u3);
+				pSrcFile->GetSemanticValue("TEXCOORD", 2, 'y', iRow, v.v3);
 			}
 			if (export_color)
 			{
-				pSrcFile->GetCellValue("in_COLOR0.x", iRow, verticsMap[iVertexID].r);
-				pSrcFile->GetCellValue("in_COLOR0.y", iRow, verticsMap[iVertexID].g);
-				pSrcFile->GetCellValue("in_COLOR0.z", iRow, verticsMap[iVertexID].b);
-				pSrcFile->GetCellValue("in_COLOR0.w", iRow, verticsMap[iVertexID].a);
+				pSrcFile->GetSemanticValue("COLOR", 0, 'x', iRow, v.r);
+				pSrcFile->GetSemanticValue("COLOR", 0, 'y', iRow, v.g);
+				pSrcFile->GetSemanticValue("COLOR", 0, 'z', iRow, v.b);
+				pSrcFile->GetSemanticValue("COLOR", 0, 'w', iRow, v.a);
 			}
 		}
 	}

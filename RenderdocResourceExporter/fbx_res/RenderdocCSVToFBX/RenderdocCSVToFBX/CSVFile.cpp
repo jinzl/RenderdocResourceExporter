@@ -1,4 +1,4 @@
-#include "CSVFile.h"
+﻿#include "CSVFile.h"
 #include "FileStream.h"
 #include "checked.h"
 
@@ -334,14 +334,51 @@ bool	CCSVFile::GetCellValue(int colIndex,int rowIndex,unsigned char& resValue)
 	return true;
 }
 
+bool CCSVFile::GetSemanticValue(
+	const char* semantic,
+	int semanticIndex,
+	char component,          // 'x','y','z','w'
+	int rowIndex,
+	float& outValue)
+{
+	char fieldName[64];
 
+	// 1️⃣ GLSL (OpenGL / Vulkan)：in_POSITION0.x
+	snprintf(fieldName, sizeof(fieldName),
+		"in_%s%d.%c", semantic, semanticIndex, component);
+	if (GetCellValue(fieldName, rowIndex, outValue))
+		return true;
+
+	// 2️⃣ Vulkan GLSL（无 index）：in_POSITION.x
+	snprintf(fieldName, sizeof(fieldName),
+		"in_%s.%c", semantic, component);
+	if (GetCellValue(fieldName, rowIndex, outValue))
+		return true;
+
+	// 3️⃣ DX / spirv-cross：POSITION0.x / TEXCOORD0.x
+	snprintf(fieldName, sizeof(fieldName),
+		"%s%d.%c", semantic, semanticIndex, component);
+	if (GetCellValue(fieldName, rowIndex, outValue))
+		return true;
+
+	// 4️⃣ DX：POSITION.x / NORMAL.x / COLOR.x
+	snprintf(fieldName, sizeof(fieldName),
+		"%s.%c", semantic, component);
+	if (GetCellValue(fieldName, rowIndex, outValue))
+		return true;
+
+	return false;
+}
 
 bool	CCSVFile::GetCellValue(const char* fieldName,int rowIndex,float& resValue)
 { 
-	int colIndex = m_mapFields[fieldName];
+	auto it = m_mapFields.find(fieldName);
+	if (it == m_mapFields.end())
+		return false;
+	int colIndex = it->second;
 	if(rowIndex >= m_vecRows.size())
 		return false;
-	if(colIndex >= m_mapFields.size())
+	if(colIndex >= m_vecRows[rowIndex].Size())
 		return false;
 	if(m_vecRows[rowIndex][colIndex] == "null")
 		resValue = 0.0f;
