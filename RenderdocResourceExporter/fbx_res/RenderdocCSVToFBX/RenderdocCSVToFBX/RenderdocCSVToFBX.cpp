@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <cstring>
 #include <set>
-
+#include <unordered_map>
 #include <fbxsdk.h>
 
 #include "CSVFile.h"
@@ -49,6 +49,8 @@ void ConvertCSV2FBX(const char* sourceCSVFile,
 	CCSVFile* pSrcFile = new CCSVFile(sourceCSVFile);
 
 	std::map<int, MeshVertex> verticsMap;
+	std::unordered_map<int, int> idxToControlPoint;
+
 	int iVertexID = 0;
 	for (int iRow = 0; iRow < pSrcFile->GetRowNum(); iRow++)
 	{
@@ -202,53 +204,50 @@ void ConvertCSV2FBX(const char* sourceCSVFile,
 	Matrix44 matRot;
 	MatrixRotationZ(&matRot, -FLT_DTOR(0));
 
-	for (int index = 0; index < verticsMap.size(); index++)
+	int controlPointIndex = 0;
+	for (const auto& kv : verticsMap)
 	{
-		Vector3 Vertex(
-			verticsMap[index].x * 100, verticsMap[index].y * 100, verticsMap[index].z * 100);
+		const int srcIdx = kv.first;
+		const MeshVertex& mv = kv.second;
+
+		idxToControlPoint[srcIdx] = controlPointIndex;
+
+		Vector3 Vertex(mv.x * 100, mv.y * 100, mv.z * 100);
 		Vec3TransformCoord(&Vertex, &Vertex, &matRot);
-		meshVectors[index].Set(Vertex.x, Vertex.y, Vertex.z);
+		meshVectors[controlPointIndex].Set(Vertex.x, Vertex.y, Vertex.z);
 
 		if(export_normal)
 		{
-			Vector3 VertexNormal(
-				verticsMap[index].nx, verticsMap[index].ny, verticsMap[index].nz);
+			Vector3 VertexNormal(mv.nx, mv.ny, mv.nz);
 			Vec3TransformNormal(&VertexNormal, &VertexNormal, &matRot);
 
-			meshNormal->GetDirectArray().Add(
-				FbxVector4(VertexNormal.x, VertexNormal.y, VertexNormal.z, 0));
+			meshNormal->GetDirectArray().Add(FbxVector4(VertexNormal.x, VertexNormal.y, VertexNormal.z, 0));
 		}
 		if(export_tangent)
 		{
-			Vector4 VertexTangent(
-				verticsMap[index].tx, verticsMap[index].ty, verticsMap[index].tz, verticsMap[index].tw);
+			Vector4 VertexTangent(mv.tx, mv.ty, mv.tz, mv.tw);
 			VertexTangent = VertexTangent * matRot;
 
-			meshTangent->GetDirectArray().Add(
-				FbxVector4(VertexTangent.x, VertexTangent.y, VertexTangent.z, VertexTangent.w));
+			meshTangent->GetDirectArray().Add(FbxVector4(VertexTangent.x, VertexTangent.y, VertexTangent.z, VertexTangent.w));
 		}
 		
 		if(export_uv)
 		{
-			meshUV->GetDirectArray().Add(
-				FbxVector2(verticsMap[index].u, verticsMap[index].v));
+			meshUV->GetDirectArray().Add(FbxVector2(mv.u, mv.v));
 		}
 		if(export_uv2)
 		{
-			meshUV2->GetDirectArray().Add(
-				FbxVector2(verticsMap[index].u2, verticsMap[index].v2));
+			meshUV2->GetDirectArray().Add(FbxVector2(mv.u2, mv.v2));
 		}
 		if(export_uv3)
 		{
-			meshUV3->GetDirectArray().Add(
-				FbxVector2(verticsMap[index].u3, verticsMap[index].v3));
+			meshUV3->GetDirectArray().Add(FbxVector2(mv.u3, mv.v3));
 		}
 		if (export_color)
 		{
-			vertexColor->GetDirectArray().Add(
-				FbxVector4(verticsMap[index].r, verticsMap[index].g, verticsMap[index].b, verticsMap[index].a)
-			);
+			vertexColor->GetDirectArray().Add(FbxVector4(mv.r, mv.g, mv.b, mv.a));
 		}
+		++controlPointIndex;
 	}
 
 	int iFaceID = 0;
@@ -257,11 +256,13 @@ void ConvertCSV2FBX(const char* sourceCSVFile,
 		meshFbx->BeginPolygon(0);
 
 		pSrcFile->GetCellValue("IDX", iRow, iFaceID);
-		meshFbx->AddPolygon(iFaceID);
+		meshFbx->AddPolygon(idxToControlPoint.at(iFaceID));
+
 		pSrcFile->GetCellValue("IDX", iRow + 1, iFaceID);
-		meshFbx->AddPolygon(iFaceID);
+		meshFbx->AddPolygon(idxToControlPoint.at(iFaceID));
+
 		pSrcFile->GetCellValue("IDX", iRow + 2, iFaceID);
-		meshFbx->AddPolygon(iFaceID);
+		meshFbx->AddPolygon(idxToControlPoint.at(iFaceID));
 
 		meshFbx->EndPolygon();
 	}
