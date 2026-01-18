@@ -42,7 +42,22 @@ def error_log(func_):
 def ExportFbx(pyrenderdoc_, data_):
     emgr = pyrenderdoc_.Extensions()
 
-    dialog = FbxExportOptionDialog(emgr) # 进行导出配置
+    # 直接从 QTableView 界面获取数据
+    main_window = pyrenderdoc_.GetMainWindow().Widget()
+    table = main_window.findChild(QtWidgets.QTableView, 'inTable')
+    model = table.model()
+    row_count = model.rowCount()
+    column_count = model.columnCount()
+    rows = range(row_count)
+    columns = range(column_count)
+
+    header_names = []
+    for c in range(column_count):
+        name = model.headerData(c, QtCore.Qt.Horizontal)
+        if name:
+            header_names.append(str(name))
+
+    dialog = FbxExportOptionDialog(emgr,header_names) # 进行导出配置
     if not dialog.mqt.ShowWidgetAsDialog(dialog.init_ui()): return # 是不是主动取消的
 
     # 选择保存位置
@@ -53,14 +68,6 @@ def ExportFbx(pyrenderdoc_, data_):
     # csv的地址
     csv_save_path = fbx_save_path.replace('.fbx', '.csv')
 
-    # 直接从 QTableView 界面获取数据
-    main_window = pyrenderdoc_.GetMainWindow().Widget()
-    table = main_window.findChild(QtWidgets.QTableView, 'inTable')
-    model = table.model()
-    row_count = model.rowCount()
-    column_count = model.columnCount()
-    rows = range(row_count)
-    columns = range(column_count)
     if len(rows) <=1 and len(columns) <= 2:
         emgr.ErrorDialog(RCM.get_text(RCM.c_not_mesh_data), 'Error!!!')
         return

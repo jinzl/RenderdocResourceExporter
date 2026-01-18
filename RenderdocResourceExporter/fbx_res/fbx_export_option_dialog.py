@@ -26,6 +26,7 @@ class FbxExportOptionDialog:
     default_config = [
         FCM.c_export_normal,
         FCM.c_export_tangent,
+        FCM.c_export_binormal,
         FCM.c_export_uv,
         FCM.c_export_uv2,
         FCM.c_export_uv3,
@@ -35,10 +36,10 @@ class FbxExportOptionDialog:
 
     export_config = {}
 
-
-    def __init__(self, emgr_):
+    def __init__(self, emgr_, header_names):
         self.emgr = emgr_
         self.mqt = emgr_.GetMiniQtHelper()
+        self.available_names = self.get_available_vertex_attributes(header_names)
 
         path, self.settings = SettingUtility.get_tempdir_setting(RCM.setting_preference)
         if not os.path.exists(path):
@@ -80,7 +81,10 @@ class FbxExportOptionDialog:
         self.mqt.AddWidget(self.widget, language_container)
 
         # 创建勾选项
-        for key in self.default_config:
+        #for key in self.default_config:
+        for key, has_attr in self.available_names.items():
+            if not has_attr:
+                continue
             widget = self.option_widget(key)
             self.mqt.AddWidget(self.widget, widget)
             self.widget_dict[key] = widget
@@ -131,3 +135,79 @@ class FbxExportOptionDialog:
 
         self.mqt.CloseCurrentDialog(True)
         pass
+        
+    def normalize_vertex_attr_name(self, header_name_):
+        """
+        将 RenderDoc / DX / Vulkan / GLSL 风格的列名
+        统一成“语义级”的顶点属性名
+    
+        规则：
+        - POSITION / NORMAL / TANGENT / BINORMAL / COLOR ：统一去掉序号
+        - TEXCOORD ：保留序号（TEXCOORD0 / TEXCOORD1 / TEXCOORD2）
+        """
+        if not header_name_:
+            return ""
+    
+        name = str(header_name_).strip()
+    
+        # 1. 去掉 GLSL / Vulkan 的 in_ 前缀
+        if name.startswith("in_"):
+            name = name[3:]
+    
+        # 2. 去掉分量后缀 .x .y .z .w
+        if "." in name:
+            base, suffix = name.rsplit(".", 1)
+            if suffix.lower() in ("x", "y", "z", "w"):
+                name = base
+    
+        name = name.upper()
+    
+        # 3. 处理 TEXCOORD（唯一需要保留序号的语义）
+        if name.startswith("TEXCOORD"):
+            return name  # TEXCOORD0 / TEXCOORD1 / TEXCOORD2
+    
+        # 4. 其余语义统一去掉末尾数字（POSITION0 -> POSITION）
+        #    只去末尾连续数字，避免误伤
+        while name and name[-1].isdigit():
+            name = name[:-1]
+    
+        return name
+        
+    def get_available_vertex_attributes(self, header_names_):
+        """
+        根据 QTableView 的列头名称，判断当前 mesh 实际拥有哪些顶点属性
+    
+        输入：
+            header_names_ : List[str]
+                例如：
+                ["POSITION.x", "POSITION.y", "NORMAL.x", "TEXCOORD0.x", "COLOR0.w"]
+    
+        输出：
+            Dict[key, bool]
+                key 为 FCM.c_export_xxx
+                value 表示该属性是否真实存在
+        """
+    
+        # 先把所有列名统一成“语义级名字”
+        semantic_names = set()
+        for h in header_names_:
+            semantic = self.normalize_vertex_attr_name(h)
+            if semantic:
+                semantic_names.add(semantic)
+    
+        # 根据语义判断属性是否存在
+        available = {
+            # 单实例语义
+            FCM.c_export_normal:   "NORMAL"   in semantic_names,
+            FCM.c_export_tangent:  "TANGENT"  in semantic_names,
+            FCM.c_export_binormal: "BINORMAL" in semantic_names,
+            FCM.c_export_color:    "COLOR"    in semantic_names,
+    
+            # TEXCOORD 是多通道语义
+            FCM.c_export_uv:   "TEXCOORD0" in semantic_names,
+            FCM.c_export_uv2:  "TEXCOORD1" in semantic_names,
+            FCM.c_export_uv3:  "TEXCOORD2" in semantic_names,
+        }
+    
+        return available
+

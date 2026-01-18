@@ -42,6 +42,7 @@ class CsvToFbx:
         export_uv2 = self.get_arg(export_config_, FCM.c_export_uv2)
         export_uv3 = self.get_arg(export_config_, FCM.c_export_uv3)
         export_color = self.get_arg(export_config_, FCM.c_export_color)
+        export_binormal = self.get_arg(export_config_, FCM.c_export_binormal)
         
         # 拼接bat路径
         current_folder = Path(__file__).absolute().parent
@@ -68,6 +69,8 @@ class CsvToFbx:
             args.append("-uv3")
         if export_color:
             args.append("-color")
+        if export_binormal:
+            args.append("-binormal")
 
         # 最终命令
         cmd = " ".join(args)
