@@ -44,8 +44,10 @@ class CsvToFbx:
         export_color = self.get_arg(export_config_, FCM.c_export_color)
         
         # 拼接bat路径
-        current_folder = Path(__file__).absolute()
-        bat_path = current_folder.parent / "csv_to_fbx.bat"
+        current_folder = Path(__file__).absolute().parent
+        parent_folder = str(current_folder)
+        parent_folder = parent_folder.replace("\n","").replace("\r","").replace("\\","/")
+        bat_path = parent_folder + "/csv_to_fbx.bat"
 
         # 参数列表
         args = []
