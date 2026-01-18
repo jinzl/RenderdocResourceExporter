@@ -5,6 +5,8 @@ So I wrote this thing.
 
 Fix to new RDC version
 Add support to vertexCOlor
+Fixed an export issue where vertex indices did not start from zero
+Automatically detects vertex attributes present in the mesh
 
 C++ code modified from https://github.com/chineseoldghost/csv2fbx
 
@@ -16,6 +18,7 @@ install：
 use:
 
 ![image](https://user-images.githubusercontent.com/12709491/193525856-08ad94b6-b19d-4ad1-a755-ee563e0e3b78.png)
+<img width="825" height="422" alt="sc_1" src="https://github.com/user-attachments/assets/31a17024-9e67-441e-969c-49800ef6ce08" />
 
 ---
 
@@ -25,6 +28,8 @@ use:
 
 修复了对新版RDC的支持
 添加了顶点颜色导出的支持
+修复了顶点序号不是从零开始的导出错误
+自动识别模型文件包含的顶点属性
 
 代码修改自 https://github.com/rrtt2323/RenderdocResourceExporter
 
