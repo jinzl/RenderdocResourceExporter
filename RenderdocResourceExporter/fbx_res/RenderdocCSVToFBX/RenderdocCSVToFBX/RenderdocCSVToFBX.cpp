@@ -18,6 +18,7 @@ struct MeshVertex
 	float x, y, z;
 	float nx, ny, nz;
 	float tx, ty, tz, tw;
+	float bx, by, bz,bw;
 	float u, v;
 	float u2, v2;
 	float u3, v3;
@@ -26,7 +27,7 @@ struct MeshVertex
 
 void ConvertCSV2FBX(const char* sourceCSVFile, 
 	bool export_normal, bool export_tangent, 
-	bool export_uv, bool export_uv2, bool export_uv3,bool export_color)
+	bool export_uv, bool export_uv2, bool export_uv3,bool export_color, bool export_binormal)
 {
 	FbxManager* sdkManager;
 	FbxIOSettings* ioSettings;
@@ -76,6 +77,13 @@ void ConvertCSV2FBX(const char* sourceCSVFile,
 				pSrcFile->GetSemanticValue("TANGENT", 0, 'z', iRow, v.tz);
 				pSrcFile->GetSemanticValue("TANGENT", 0, 'w', iRow, v.tw);
 			}
+			if (export_binormal)
+			{
+				pSrcFile->GetSemanticValue("BINORMAL", 0, 'x', iRow, v.bx);
+				pSrcFile->GetSemanticValue("BINORMAL", 0, 'y', iRow, v.by);
+				pSrcFile->GetSemanticValue("BINORMAL", 0, 'z', iRow, v.bz);
+				pSrcFile->GetSemanticValue("BINORMAL", 0, 'w', iRow, v.bw);
+			}
 
 			if(export_uv)
 			{
@@ -122,6 +130,7 @@ void ConvertCSV2FBX(const char* sourceCSVFile,
 
 	FbxGeometryElementNormal* meshNormal = NULL;
 	FbxGeometryElementTangent* meshTangent = NULL;
+	FbxGeometryElementBinormal* meshBinormal = NULL;
 	FbxGeometryElementUV* meshUV = NULL;
 	FbxGeometryElementUV* meshUV2 = NULL;
 	FbxGeometryElementUV* meshUV3 = NULL;
@@ -141,6 +150,10 @@ void ConvertCSV2FBX(const char* sourceCSVFile,
 	if(export_tangent)
 	{
 		meshTangent = meshFbx->CreateElementTangent();
+	}
+	if (export_binormal)
+	{
+		meshBinormal = meshFbx->CreateElementBinormal();
 	}
 
 	if(export_uv)
@@ -174,6 +187,12 @@ void ConvertCSV2FBX(const char* sourceCSVFile,
 		meshTangent->SetMappingMode(FbxGeometryElementTangent::eByControlPoint);
 		meshTangent->SetReferenceMode(FbxGeometryElementTangent::eDirect);
 		layer->SetTangents(meshTangent);
+	}
+	if (export_binormal)
+	{
+		meshBinormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
+		meshBinormal->SetReferenceMode(FbxGeometryElement::eDirect);
+		layer->SetBinormals(meshBinormal);
 	}
 
 	if(export_uv)
@@ -229,6 +248,13 @@ void ConvertCSV2FBX(const char* sourceCSVFile,
 			VertexTangent = VertexTangent * matRot;
 
 			meshTangent->GetDirectArray().Add(FbxVector4(VertexTangent.x, VertexTangent.y, VertexTangent.z, VertexTangent.w));
+		}
+		if (export_binormal)
+		{
+			Vector4 VertexBinormal(mv.bx, mv.by, mv.bz, mv.bw);
+			VertexBinormal = VertexBinormal * matRot;
+
+			meshBinormal->GetDirectArray().Add(FbxVector4(VertexBinormal.x, VertexBinormal.y, VertexBinormal.z, VertexBinormal.w));
 		}
 		
 		if(export_uv)
@@ -359,6 +385,7 @@ int main(int argc, char* argv[])
 	bool export_uv2 = false;
 	bool export_uv3 = false;
 	bool export_color = false;
+	bool export_binormal = false;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -376,10 +403,13 @@ int main(int argc, char* argv[])
 			export_uv3 = true;
 		else if (strcmp(arg, "-color") == 0)
 			export_color = true;
+		else if (strcmp(arg, "-binormal") == 0)
+			export_binormal = true;
 	}
 
 	printf("export_normal  = %d\n", export_normal);
 	printf("export_tangent = %d\n", export_tangent);
+	printf("export_binormal = %d\n", export_binormal);
 	printf("export_uv      = %d\n", export_uv);
 	printf("export_uv2     = %d\n", export_uv2);
 	printf("export_uv3     = %d\n", export_uv3);
@@ -387,5 +417,5 @@ int main(int argc, char* argv[])
 
 	ConvertCSV2FBX(inputPath,
 		export_normal, export_tangent, 
-		export_uv, export_uv2, export_uv3, export_color);
+		export_uv, export_uv2, export_uv3, export_color, export_binormal);
 }
