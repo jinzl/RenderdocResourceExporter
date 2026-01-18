@@ -12,12 +12,13 @@ C++ code modified from https://github.com/chineseoldghost/csv2fbx<br>
 
 install：<br>
 
-![image](https://user-images.githubusercontent.com/12709491/193525642-72e231b9-88b4-4d16-92ec-5802e83208d6.png)
-![image](https://user-images.githubusercontent.com/12709491/193525544-19983e33-db7e-49ed-92c7-859f43e95e1e.png)
+<img width="525" height="225" alt="ScreenShot_2026-01-18_230918_906" src="https://github.com/user-attachments/assets/04faf8c5-24c9-4b6e-b4e4-0f48ac724762" />
+
+<img width="556" height="569" alt="ScreenShot_2026-01-18_230712_628" src="https://github.com/user-attachments/assets/9501de24-b17b-4c19-bee5-00d1b5cf3c45" />
 
 use:<br>
 
-![image](https://user-images.githubusercontent.com/12709491/193525856-08ad94b6-b19d-4ad1-a755-ee563e0e3b78.png)
+<img width="759" height="314" alt="ScreenShot_2026-01-18_230638_324" src="https://github.com/user-attachments/assets/61172e4e-1f8e-4fb8-aaa8-cca96de28186" />
 <img width="825" height="422" alt="sc_1" src="https://github.com/user-attachments/assets/31a17024-9e67-441e-969c-49800ef6ce08" />
 
 ---<br>
